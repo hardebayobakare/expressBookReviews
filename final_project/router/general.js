@@ -26,19 +26,16 @@ function bookList () {
         resolve(books)
     })
 }
+
+async function getBookList(){
+    return books;
+}
 // Get the book list available in the shop
-public_users.get('/',function (req, res) {
+public_users.get('/', async function (req, res) {
   //Write your code here
-  bookList()
-    .then(data => {
-        response = { books: data};
-        res.send(JSON.stringify(response, null, 4));
-    })
-    .catch(error => {
-        console.error(error);
-        res.status(500).send('An error occurred.');
-    })
-  
+  const data = await getBookList();
+  response = { books: data};
+  res.send(JSON.stringify(response, null, 4));
 });
 
 // Get book details based on ISBN
