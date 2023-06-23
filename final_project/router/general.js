@@ -7,50 +7,93 @@ const public_users = express.Router();
 
 public_users.post("/register", (req,res) => {
   //Write your code here
-  
-  return res.status(300).json({message: "Yet to be implemented"});
+  const username = req.body.username;
+  const password = req.body.password;
+  if(username && password){
+      if (isValid(username)) { 
+          users.push({"username":username,"password":password});
+          return res.status(200).json({message: "User successfully registred. Now you can login"});
+        } else {
+          return res.status(404).json({message: "User already exists!"});    
+        }
+  } else {
+      return res.status(404).json({message: "Provide Username and Password"});
+  }
 });
 
+function bookList () {
+    return new Promise ((resolve, reject) => {
+        resolve(books)
+    })
+}
 // Get the book list available in the shop
 public_users.get('/',function (req, res) {
   //Write your code here
-  return res.send(JSON.stringify(books, null, 4));
+  bookList()
+    .then(data => {
+      res.send(JSON.stringify(data, null, 4));
+    })
+    .catch(error => {
+        console.error(error);
+        res.status(500).send('An error occurred.');
+    })
+  
 });
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
   //Write your code here
   const isbn = parseInt(req.params.isbn);
-  let book = books[isbn]
-  if (book) {
-    return res.send(JSON.stringify(book, null, 4));
-  } else {
-    return res.send("Book not found");
-  }
-  
+  bookList()
+    .then(data => {
+        let book = data[isbn];
+        if (book) {
+            return res.send(JSON.stringify(book, null, 4));
+        } else {
+            return res.send("Book not found");
+        }        
+    })
+    .catch(error => {
+        console.error(error);
+        res.status(500).send('An error occurred.');
+    })
  });
   
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
     const author = req.params.author;
-    for (key in books){
-        if (books[key]["author"] === author){
-            return res.send(JSON.stringify(books[key], null, 4));
+    bookList()
+    .then(data => {
+        for (key in data){
+            if (data[key]["author"] === author){
+                return res.send(JSON.stringify(books[key], null, 4));
+            }
         }
-    }
-  return res.send("Book not found");
+        return res.send("Book not found");     
+    })
+    .catch(error => {
+        console.error(error);
+        res.status(500).send('An error occurred.');
+    })
 });
 
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
   //Write your code here
   const title = req.params.title;
-    for (key in books){
-        if (books[key]["title"] === title){
-            return res.send(JSON.stringify(books[key], null, 4));
+  bookList()
+    .then(data => {
+        for (key in books){
+            if (books[key]["title"] === title){
+                return res.send(JSON.stringify(books[key], null, 4));
+            }
         }
-    }
-  return res.send("Book not found");
+        return res.send("Book not found");     
+    })
+    .catch(error => {
+        console.error(error);
+        res.status(500).send('An error occurred.');
+    })
 });
 
 //  Get book review

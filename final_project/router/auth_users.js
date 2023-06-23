@@ -54,27 +54,36 @@ regd_users.post("/login", (req,res) => {
   return res.status(300).json({message: "Yet to be implemented"});
 });
 
-regd_users.post("/register", (req, res) => {
-    const username = req.body.username;
-    const password = req.body.password;
-
-    if(username && password){
-        if (isValid(username)) { 
-            users.push({"username":username,"password":password});
-            return res.status(200).json({message: "User successfully registred. Now you can login"});
-          } else {
-            return res.status(404).json({message: "User already exists!"});    
-          }
-    } else {
-        return res.status(404).json({message: "Provide Username and Password"});
-    }
-});
-
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  //Write your code here\
+  const isbn = req.params.isbn;
+  let username = req.body.username;
+  let review = req.body.review;
+  if (books[parseInt(isbn)]) {
+      console.log(username);
+      if (username && review){
+        books[parseInt(isbn)]["reviews"][username] = review;
+        return res.status(200).send("Review updated!");
+      } else {
+        return res.status(404).json({message: "Provide Username and Review Content"});
+      }
+  } else {
+    return res.send("Book not found");
+  }
 });
+
+//Delete a book review
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    const isbn = req.params.isbn;
+    username = req.session.authorization["username"];
+    if(username){
+        delete books[parseInt(isbn)]["reviews"][username];
+        return res.status(200).send("Review deleted!");
+    } else {
+        return res.status(403).json({message: "Login to continue"})
+    }
+})
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
