@@ -58,19 +58,24 @@ regd_users.post("/login", (req,res) => {
 regd_users.put("/auth/review/:isbn", (req, res) => {
   //Write your code here\
   const isbn = req.params.isbn;
-  let username = req.body.username;
+  username = req.session.authorization["username"];
   let review = req.body.review;
-  if (books[parseInt(isbn)]) {
-      console.log(username);
-      if (username && review){
-        books[parseInt(isbn)]["reviews"][username] = review;
-        return res.status(200).send("Review updated!");
-      } else {
-        return res.status(404).json({message: "Provide Username and Review Content"});
-      }
+  if(username){
+    if (books[parseInt(isbn)]) {
+        if (review){
+          books[parseInt(isbn)]["reviews"][username] = review;
+          return res.status(200).send("The review for the book ISBN " + isbn + " has been added/updated");
+        } else {
+          return res.status(404).json({message: "Provide Review Content"});
+        }
+    } else {
+      return res.send("Book not found");
+    }
   } else {
-    return res.send("Book not found");
+    return res.status(403).json({message: "Login to continue"})
   }
+  
+
 });
 
 //Delete a book review
@@ -79,7 +84,7 @@ regd_users.delete("/auth/review/:isbn", (req, res) => {
     username = req.session.authorization["username"];
     if(username){
         delete books[parseInt(isbn)]["reviews"][username];
-        return res.status(200).send("Review deleted!");
+        return res.status(200).send("The review for the book ISBN " + isbn + " has been deleted");
     } else {
         return res.status(403).json({message: "Login to continue"})
     }

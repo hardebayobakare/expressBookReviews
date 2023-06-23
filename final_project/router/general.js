@@ -31,7 +31,8 @@ public_users.get('/',function (req, res) {
   //Write your code here
   bookList()
     .then(data => {
-      res.send(JSON.stringify(data, null, 4));
+        response = { books: data};
+        res.send(JSON.stringify(response, null, 4));
     })
     .catch(error => {
         console.error(error);
@@ -62,14 +63,20 @@ public_users.get('/isbn/:isbn',function (req, res) {
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
     const author = req.params.author;
+    booksList = [];
     bookList()
     .then(data => {
         for (key in data){
             if (data[key]["author"] === author){
-                return res.send(JSON.stringify(books[key], null, 4));
+                booksList.push(data[key]); 
             }
         }
-        return res.send("Book not found");     
+        if (booksList.length > 0) {
+            response = { booksbyauthor: booksList };
+            return res.send(JSON.stringify(response, null, 4));
+        } else {
+            return res.send("Book not found");
+        }     
     })
     .catch(error => {
         console.error(error);
@@ -81,14 +88,20 @@ public_users.get('/author/:author',function (req, res) {
 public_users.get('/title/:title',function (req, res) {
   //Write your code here
   const title = req.params.title;
+  booksList = [];
   bookList()
     .then(data => {
-        for (key in books){
-            if (books[key]["title"] === title){
-                return res.send(JSON.stringify(books[key], null, 4));
+        for (key in data){
+            if (data[key]["title"] === title){
+                booksList.push(data[key]); 
             }
         }
-        return res.send("Book not found");     
+        if (booksList.length > 0) {
+            response = { booksbytitle: booksList };
+            return res.send(JSON.stringify(response, null, 4));
+        } else {
+            return res.send("Book not found");
+        }     
     })
     .catch(error => {
         console.error(error);
